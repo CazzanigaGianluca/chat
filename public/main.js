@@ -242,6 +242,7 @@ $(function() {
     // Whenever the server emits 'new message', update the chat body
     socket.on('new message', (data) => {
         addChatMessage(data);
+		notifyMe(data.username,data.message)
     });
 
     // Whenever the server emits 'user joined', log it in the chat body
@@ -282,4 +283,31 @@ $(function() {
         log('attempt to reconnect has failed');
     });
 
+    // request permission on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        if (!Notification) {
+            alert('Desktop notifications not available in your browser. Try another browser.');
+            return;
+        }
+
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+    });
+
+    function notifyMe(user,message) {
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+        else {
+            var notification = new Notification('New message in Chat!', {
+                icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTRff7tt8jNJ4SlkQsVf37_KBG3MK1NdhXpUgLNrVL7yhEuWwWo',
+                body: user + " :" + message,
+            });
+
+            notification.onclick = function () {
+                window.open("https://chat-developers.herokuapp.com/");
+            };
+        }
+    }
 });
